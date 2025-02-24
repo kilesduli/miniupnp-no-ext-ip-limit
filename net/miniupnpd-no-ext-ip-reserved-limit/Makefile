@@ -7,13 +7,15 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=miniupnpd
+PKG_NAME:=miniupnpd-no-ext-ip-reserved-limit
 PKG_VERSION:=2.3.7
 PKG_RELEASE:=1
 
-PKG_SOURCE_URL:=https://miniupnp.tuxfamily.org/files
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_HASH:=fbdd5501039730f04a8420ea2f8f54b7df63f9f04cde2dc67fa7371e80477bbe
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/kilesduli/miniupnp
+PKG_SOURCE_VERSION:=fd4c50358ab6e67b16be736621ea42478808d9ee
+PKG_MIRROR_HASH:=skip
+PKG_BUILD_DIR:=$(BUILD_DIR)/miniupnpd
 
 PKG_MAINTAINER:=
 PKG_LICENSE:=BSD-3-Clause
@@ -26,21 +28,22 @@ PKG_BUILD_PARALLEL:=1
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/version.mk
 
-define Package/miniupnpd/Default
+define Package/miniupnpd-no-ext-ip-reserved-limit/Default
   SECTION:=net
   CATEGORY:=Network
   DEPENDS:= \
 	+libcap-ng \
 	+libmnl \
 	+libuuid
-  PROVIDES:=miniupnpd
+  PROVIDES:=miniupnpd-no-ext-ip-reserved-limit
+  CONFLICTS:=miniupnpd
   TITLE:=Lightweight UPnP IGD & PCP/NAT-PMP daemon
   SUBMENU:=Firewall
-  URL:=https://miniupnp.tuxfamily.org/
+  URL:=https://github.com/kilesduli/miniupnp
 endef
 
-define Package/miniupnpd-iptables
-  $(call Package/miniupnpd/Default)
+define Package/miniupnpd-no-ext-ip-reserved-limit-iptables
+  $(call Package/miniupnpd-no-ext-ip-reserved-limit/Default)
   DEPENDS+= \
 	+IPV6:ip6tables \
 	+IPV6:libip6tc \
@@ -48,25 +51,26 @@ define Package/miniupnpd-iptables
 	+libip4tc \
 	+libnetfilter-conntrack
   TITLE+= (iptables)
+  CONFLICTS:=miniupnpd-iptables
   VARIANT:=iptables
 endef
 
-define Package/miniupnpd-nftables
-  $(call Package/miniupnpd/Default)
+define Package/miniupnpd-no-ext-ip-reserved-limit-nftables
+  $(call Package/miniupnpd-no-ext-ip-reserved-limit/Default)
   DEPENDS+= \
 	+libnftnl
   TITLE+= (nftables)
   VARIANT:=nftables
   DEFAULT_VARIANT:=1
-  CONFLICTS:=miniupnpd-iptables
+  CONFLICTS:=miniupnpd-no-ext-ip-reserved-limit-iptables miniupnpd-nftables
 endef
 
-define Package/miniupnpd/conffiles/Default
+define Package/miniupnpd-no-ext-ip-reserved-limit/conffiles/Default
 /etc/config/upnpd
 endef
 
-Package/miniupnpd-iptables/conffiles = $(Package/miniupnpd/conffiles/Default)
-Package/miniupnpd-nftables/conffiles = $(Package/miniupnpd/conffiles/Default)
+Package/miniupnpd-no-ext-ip-reserved-limit-iptables/conffiles = $(Package/miniupnpd-no-ext-ip-reserved-limit/conffiles/Default)
+Package/miniupnpd-no-ext-ip-reserved-limit-nftables/conffiles = $(Package/miniupnpd-no-ext-ip-reserved-limit/conffiles/Default)
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
@@ -89,7 +93,7 @@ ifeq ($(BUILD_VARIANT),iptables)
 	TARGET_CFLAGS += -flto
 endif
 
-define Package/miniupnpd/install/Default
+define Package/miniupnpd-no-ext-ip-reserved-limit/install/Default
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_DIR) $(1)/etc/config
@@ -100,19 +104,19 @@ define Package/miniupnpd/install/Default
 	$(INSTALL_DATA) ./files/miniupnpd.hotplug $(1)/etc/hotplug.d/iface/50-miniupnpd
 endef
 
-define Package/miniupnpd-iptables/install
-	$(call Package/miniupnpd/install/Default,$1)
+define Package/miniupnpd-no-ext-ip-reserved-limit-iptables/install
+	$(call Package/miniupnpd-no-ext-ip-reserved-limit/install/Default,$1)
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/usr/share/miniupnpd
 	$(INSTALL_BIN) ./files/miniupnpd.defaults.iptables $(1)/etc/uci-defaults/99-miniupnpd
 	$(INSTALL_DATA) ./files/firewall3.include $(1)/usr/share/miniupnpd/firewall.include
 endef
 
-define Package/miniupnpd-nftables/install
-	$(call Package/miniupnpd/install/Default,$1)
+define Package/miniupnpd-no-ext-ip-reserved-limit-nftables/install
+	$(call Package/miniupnpd-no-ext-ip-reserved-limit/install/Default,$1)
 	$(INSTALL_DIR) $(1)/usr/share/nftables.d
 	$(CP) ./files/nftables.d/* $(1)/usr/share/nftables.d/
 endef
 
-$(eval $(call BuildPackage,miniupnpd-iptables))
-$(eval $(call BuildPackage,miniupnpd-nftables))
+$(eval $(call BuildPackage,miniupnpd-no-ext-ip-reserved-limit-iptables))
+$(eval $(call BuildPackage,miniupnpd-no-ext-ip-reserved-limit-nftables))
