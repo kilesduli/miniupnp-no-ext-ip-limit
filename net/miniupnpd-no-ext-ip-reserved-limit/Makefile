@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd-no-ext-ip-reserved-limit
 PKG_VERSION:=2.3.7
-PKG_RELEASE:=1
+PKG_RELEASE:=99
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/kilesduli/miniupnp
@@ -29,19 +29,16 @@ include $(INCLUDE_DIR)/version.mk
 
 define Package/miniupnpd-no-ext-ip-reserved-limit/Default
   SECTION:=net
-  CATEGORY:=Network
   DEPENDS:= \
 	+libcap-ng \
 	+libmnl \
 	+libuuid
-  PROVIDES:=miniupnpd-no-ext-ip-reserved-limit
-  CONFLICTS:=miniupnpd
+  PROVIDES:=miniupnpd
   TITLE:=Lightweight UPnP IGD & PCP/NAT-PMP daemon
-  SUBMENU:=Firewall
   URL:=https://github.com/kilesduli/miniupnp
 endef
 
-define Package/miniupnpd-no-ext-ip-reserved-limit-iptables
+define Package/miniupnpd-iptables
   $(call Package/miniupnpd-no-ext-ip-reserved-limit/Default)
   DEPENDS+= \
 	+IPV6:ip6tables \
@@ -50,26 +47,25 @@ define Package/miniupnpd-no-ext-ip-reserved-limit-iptables
 	+libip4tc \
 	+libnetfilter-conntrack
   TITLE+= (iptables)
-  CONFLICTS:=miniupnpd-iptables
   VARIANT:=iptables
 endef
 
-define Package/miniupnpd-no-ext-ip-reserved-limit-nftables
+define Package/miniupnpd-nftables
   $(call Package/miniupnpd-no-ext-ip-reserved-limit/Default)
   DEPENDS+= \
 	+libnftnl
   TITLE+= (nftables)
   VARIANT:=nftables
   DEFAULT_VARIANT:=1
-  CONFLICTS:=miniupnpd-no-ext-ip-reserved-limit-iptables miniupnpd-nftables
+  CONFLICTS:=miniupnpd-iptables
 endef
 
 define Package/miniupnpd-no-ext-ip-reserved-limit/conffiles/Default
 /etc/config/upnpd
 endef
 
-Package/miniupnpd-no-ext-ip-reserved-limit-iptables/conffiles = $(Package/miniupnpd-no-ext-ip-reserved-limit/conffiles/Default)
-Package/miniupnpd-no-ext-ip-reserved-limit-nftables/conffiles = $(Package/miniupnpd-no-ext-ip-reserved-limit/conffiles/Default)
+Package/miniupnpd-iptables/conffiles = $(Package/miniupnpd-no-ext-ip-reserved-limit/conffiles/Default)
+Package/miniupnpd-nftables/conffiles = $(Package/miniupnpd-no-ext-ip-reserved-limit/conffiles/Default)
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
@@ -106,7 +102,7 @@ define Package/miniupnpd-no-ext-ip-reserved-limit/install/Default
 	$(INSTALL_DATA) ./files/miniupnpd.hotplug $(1)/etc/hotplug.d/iface/50-miniupnpd
 endef
 
-define Package/miniupnpd-no-ext-ip-reserved-limit-iptables/install
+define Package/miniupnpd-iptables/install
 	$(call Package/miniupnpd-no-ext-ip-reserved-limit/install/Default,$1)
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/usr/share/miniupnpd
@@ -114,11 +110,11 @@ define Package/miniupnpd-no-ext-ip-reserved-limit-iptables/install
 	$(INSTALL_DATA) ./files/firewall3.include $(1)/usr/share/miniupnpd/firewall.include
 endef
 
-define Package/miniupnpd-no-ext-ip-reserved-limit-nftables/install
+define Package/miniupnpd-nftables/install
 	$(call Package/miniupnpd-no-ext-ip-reserved-limit/install/Default,$1)
 	$(INSTALL_DIR) $(1)/usr/share/nftables.d
 	$(CP) ./files/nftables.d/* $(1)/usr/share/nftables.d/
 endef
 
-$(eval $(call BuildPackage,miniupnpd-no-ext-ip-reserved-limit-iptables))
-$(eval $(call BuildPackage,miniupnpd-no-ext-ip-reserved-limit-nftables))
+$(eval $(call BuildPackage,miniupnpd-iptables))
+$(eval $(call BuildPackage,miniupnpd-nftables))
