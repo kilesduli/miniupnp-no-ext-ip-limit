@@ -63,6 +63,7 @@ upnpd() {
 	local use_stun stun_host stun_port uuid notify_interval presentation_url
 	local upnp_lease_file clean_ruleset_threshold clean_ruleset_interval
 	local ipv6_disable
+	local stun_no_ext_ip_reserved_limit
 
 	local enabled
 	config_get_bool enabled config enabled 1
@@ -90,6 +91,7 @@ upnpd() {
 	config_get clean_ruleset_threshold config clean_ruleset_threshold
 	config_get clean_ruleset_interval config clean_ruleset_interval
 	config_get ipv6_disable config ipv6_disable 0
+	config_get stun_no_ext_ip_reserved_limit config stun_no_ext_ip_reserved_limit 0
 
 	local conf ifname ifname6
 
@@ -146,6 +148,7 @@ upnpd() {
 		[ "$use_stun" -eq 0 ] || {
 			[ -n "$stun_host" ] && echo "ext_stun_host=$stun_host"
 			[ -n "$stun_port" ] && echo "ext_stun_port=$stun_port"
+			upnpd_write_bool stun_no_ext_ip_limit $stun_no_ext_ip_limit ext_stun_no_ext_ip_limit
 		}
 
 		[ -n "$upload" ] && [ -n "$download" ] && {
