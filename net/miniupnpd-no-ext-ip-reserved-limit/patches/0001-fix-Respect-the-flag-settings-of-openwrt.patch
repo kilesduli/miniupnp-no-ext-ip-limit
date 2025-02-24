@@ -1,0 +1,32 @@
+From 869901d68e50823c39f840f4523d046f3c9c46f3 Mon Sep 17 00:00:00 2001
+From: duli <duli4868@gmail.com>
+Date: Mon, 24 Feb 2025 16:17:10 +0800
+Subject: [PATCH] fix: Respect the flag settings of openwrt
+
+---
+ miniupnpd/Makefile.linux | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/miniupnpd/Makefile.linux b/miniupnpd/Makefile.linux
+index c0659f7..808764e 100644
+--- a/miniupnpd/Makefile.linux
++++ b/miniupnpd/Makefile.linux
+@@ -35,14 +35,11 @@ CPPFLAGS += -D_GNU_SOURCE
+ 
+ #CFLAGS = -O -g -DDEBUG
+ CFLAGS ?= -Os
+-CFLAGS += -fno-strict-aliasing
+-CFLAGS += -fno-common
+-CFLAGS += -fstack-protector -fPIE
+ CFLAGS += -Wall
+ CFLAGS += -Wextra -Wstrict-prototypes -Wdeclaration-after-statement
+ #CFLAGS += -Wno-missing-field-initializers
+ #CFLAGS += -ansi	# iptables headers does use typeof which is a gcc extension
+-LDFLAGS += -Wl,-z,now -Wl,-z,relro -pie
++LDFLAGS ?= -Wl,-z,now -Wl,-z,relro -pie
+ CC ?= gcc
+ RM = rm -f
+ INSTALL = install
+-- 
+2.48.1
+
