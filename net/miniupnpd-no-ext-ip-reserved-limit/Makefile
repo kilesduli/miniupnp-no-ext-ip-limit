@@ -73,6 +73,9 @@ Package/miniupnpd-no-ext-ip-reserved-limit-nftables/conffiles = $(Package/miniup
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
+	$(FIND) $(PKG_BUILD_DIR) -mindepth 1 -maxdepth 1 ! -name "miniupnpd" -exec $(RM) -rf {} +
+	$(CP) $(PKG_BUILD_DIR)/miniupnpd/* $(PKG_BUILD_DIR)
+	$(RM) -r $(PKG_BUILD_DIR)/miniupnpd
 	echo "$(VERSION_NUMBER)" | tr '() ' '_' >$(PKG_BUILD_DIR)/os.openwrt
 endef
 
