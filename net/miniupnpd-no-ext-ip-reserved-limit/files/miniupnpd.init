@@ -148,7 +148,7 @@ upnpd() {
 		[ "$use_stun" -eq 0 ] || {
 			[ -n "$stun_host" ] && echo "ext_stun_host=$stun_host"
 			[ -n "$stun_port" ] && echo "ext_stun_port=$stun_port"
-			upnpd_write_bool stun_no_ext_ip_limit $stun_no_ext_ip_limit ext_stun_no_ext_ip_limit
+			upnpd_write_bool stun_no_ext_ip_reserved_limit $stun_no_ext_ip_reserved_limit ext_stun_no_ext_ip_reserved_limit
 		}
 
 		[ -n "$upload" ] && [ -n "$download" ] && {
